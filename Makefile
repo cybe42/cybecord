@@ -6,3 +6,5 @@ build:
 release:
 	go build -o bin/cybecord -ldflags "-s -w" $(source) release.go
 
+run:
+	go run $(source)
