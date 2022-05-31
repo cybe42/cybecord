@@ -1,4 +1,4 @@
-source = main.go static.go
+source = main.go static.go flags.go
 
 build:
 	go build -o bin/cybecord-debug $(source) 
