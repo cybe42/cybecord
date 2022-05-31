@@ -14,15 +14,19 @@ var static embed.FS
 	Bootstrap string
 )*/ // No need to be global for now
 
+type fileHandler struct {
+	engine *gin.Engine
+}
+
+func (handler *fileHandler) addFileHandle(path string, filePath string) {
+	file, _ := static.ReadFile(filePath)
+	var fileContent string = string(file)
+	handler.engine.GET(path, func(c *gin.Context) { c.String(200, fileContent) })
+}
+
 func Static(r *gin.Engine) {
+	var filehandler fileHandler = fileHandler{engine: r}
 
-	index, _ := static.ReadFile("static/index.html")
-	bootstrap, _ := static.ReadFile("static/bootstrap.min.css")
-
-	var Index string = string(index)
-	var Bootstrap string = string(bootstrap)
-
-	// Serve the static files.
-	r.GET("/", func(c *gin.Context) { c.String(200, Index) })
-	r.GET("/bootstrap.min.js", func(c *gin.Context) { c.String(200, Bootstrap) })
+	filehandler.addFileHandle("/", "static/index.html")
+	filehandler.addFileHandle("/bootstrap.min.css", "static/bootstrap.min.css")
 }
