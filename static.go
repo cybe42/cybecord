@@ -51,7 +51,13 @@ func (handler *fileHandler) addFileHandle(path string, filePath string) {
 
 func Static(r *gin.Engine) {
 	var filehandler fileHandler = fileHandler{engine: r}
-
-	filehandler.addFileHandle("/", "static/index.html")
-	filehandler.addFileHandle("/bootstrap.min.css", "static/bootstrap.min.css")
+	staticDir, _ := static.ReadDir("static")
+	for _, file := range staticDir {
+		var fileName string = file.Name()
+		if fileName != "index.html" {
+			filehandler.addFileHandle("/"+fileName, "static/"+fileName)
+		} else {
+			filehandler.addFileHandle("/", "static/"+fileName)
+		}
+	}
 }
