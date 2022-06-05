@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"mime"
 	"strings"
 
@@ -39,6 +40,10 @@ func getFileType(filePath string) string {
 	}
 }
 
+func cropFileExtension(filePath string, extension string) string {
+	return filePath[:len(filePath)-len(extension)]
+}
+
 func (handler *fileHandler) addFileHandle(path string, filePath string) {
 	file, _ := static.ReadFile(filePath)
 	var fileContent string = string(file)
@@ -54,12 +59,23 @@ func Static(r *gin.Engine) {
 	staticDir, _ := static.ReadDir("static")
 	for _, file := range staticDir { // looping through all the embedded files
 		var fileName string = file.Name()
-		if fileName == "index.html" {
+		switch fileName {
+		case "index.html":
 			filehandler.addFileHandle("/", "static/"+fileName)
-		} else if getFileExtension(fileName) == ".html" { // remove .html from path
-			filehandler.addFileHandle("/"+fileName[:len(fileName)-len(".html")], "static/"+fileName)
-		} else { // else just serve file regularly
-			filehandler.addFileHandle("/"+fileName, "static/"+fileName)
+		case "notfound.html":
+			fmt.Println("amogus")
+			file, _ := static.ReadFile("static/" + fileName)
+			var fileContent string = string(file)
+			filehandler.engine.NoRoute(func(c *gin.Context) {
+				c.Header("Content-Type", getFileExtension(fileName))
+				c.String(404, fileContent)
+			})
+		default:
+			if getFileExtension(fileName) == ".html" { // remove .html from path
+				filehandler.addFileHandle("/"+cropFileExtension(fileName, ".html"), "static/"+fileName)
+			} else { // else just serve file regularly
+				filehandler.addFileHandle("/"+fileName, "static/"+fileName)
+			}
 		}
 	}
 }
